@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,9 +26,13 @@ import java.util.Optional;
 public class AuthController {
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String HEADER_STRING = "Authorization";
+
     private final AuthenticationManager authenticationManager;
+
     private final UserDetailsService userDetailsService;
+
     private final UserRepository userRepository;
+
     private final JwtUtil jwtUtil;
 
     @PostMapping("/authenticate")

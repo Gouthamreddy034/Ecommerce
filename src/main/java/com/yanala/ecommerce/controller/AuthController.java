@@ -1,14 +1,19 @@
 package com.yanala.ecommerce.controller;
 
 import com.yanala.ecommerce.dto.AuthenticationRequest;
+import com.yanala.ecommerce.dto.SignupRequest;
+import com.yanala.ecommerce.dto.UserDto;
 import com.yanala.ecommerce.entity.User;
 import com.yanala.ecommerce.repository.UserRepository;
+import com.yanala.ecommerce.services.auth.AuthService;
 import com.yanala.ecommerce.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,6 +40,8 @@ public class AuthController {
 
     private final JwtUtil jwtUtil;
 
+    private final AuthService authService;
+
     @PostMapping("/authenticate")
     public void createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest,
                                           HttpServletResponse response) throws IOException, JSONException {
@@ -56,5 +63,15 @@ public class AuthController {
                     .toString());
         }
         response.addHeader(HEADER_STRING,TOKEN_PREFIX+jwt);
+    }
+
+    @PostMapping("/sign-up")
+    public ResponseEntity<?> signupUser(@RequestBody SignupRequest signupRequest){
+        if(authService.hasUserWithEmail(signupRequest.getEmail())){
+            return new ResponseEntity<>("User already Exists", HttpStatus.NOT_ACCEPTABLE);
+        }
+
+        UserDto userDto = authService.createUser(signupRequest);
+        return  new ResponseEntity<>(userDto,HttpStatus.OK);
     }
 }

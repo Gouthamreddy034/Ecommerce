@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,12 +44,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/authenticate")
-    public void createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest,
-                                          HttpServletResponse response) throws IOException, JSONException {
-        try{
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(),
-                    authenticationRequest.getPassword()));
-        }catch (BadCredentialsException e){
+    public ResponseEntity<String> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws IOException, JSONException {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
+            );
+        } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Incorrect Username or Password");
         }
 
@@ -56,13 +57,20 @@ public class AuthController {
         Optional<User> optionalUser = userRepository.findFirstByEmail(userDetails.getUsername());
         final String jwt = jwtUtil.generateToken(userDetails.getUsername());
 
-        if(optionalUser.isPresent()){
-            response.getWriter().write(new JSONObject()
-                    .put("userId",optionalUser.get().getId())
-                    .put("role",optionalUser.get().getRole())
-                    .toString());
+        JSONObject responseJson = new JSONObject();
+        if (optionalUser.isPresent()) {
+            responseJson.put("userId", optionalUser.get().getId());
+            responseJson.put("role", optionalUser.get().getRole());
         }
-        response.addHeader(HEADER_STRING,TOKEN_PREFIX+jwt);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Expose-Headers", "Authorization");
+        headers.add("Access-Control-Allow-Headers", "Authorization, X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, X-Custom-header");
+        headers.add("Authorization", "Bearer " + jwt);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(responseJson.toString());
     }
 
     @PostMapping("/sign-up")

@@ -22,16 +22,16 @@ public class WebSecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/authenticate", "/sign-up", "/order/**").permitAll()
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().authenticated()
+        http.csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless APIs
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/authenticate", "/sign-up", "/order/**").permitAll() // Public endpoints
+                        .requestMatchers("/api/**").authenticated() // Secure endpoints
+                        .anyRequest().authenticated() // Any other request must be authenticated
                 )
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless session management
                 )
-                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class); // Add custom JWT filter
 
         return http.build();
     }

@@ -1,6 +1,8 @@
 package com.yanala.ecommerce.services.customer.cart;
 
 import com.yanala.ecommerce.dto.AddProductInCartDto;
+import com.yanala.ecommerce.dto.CartItemsDto;
+import com.yanala.ecommerce.dto.OrderDto;
 import com.yanala.ecommerce.entity.CartItems;
 import com.yanala.ecommerce.entity.Order;
 import com.yanala.ecommerce.entity.Product;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -64,6 +67,22 @@ public class CartServiceImpl implements CartService{
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or Product Not Found");
             }
         }
+    }
+
+    @Override
+    public OrderDto getCartByUserId(Long userId){
+        Order activeOrder = orderRepository.findByUserIdAndOrderStatus(userId, OrderStatus.Pending);
+        List<CartItemsDto> cartItemsDtoList = activeOrder.getCartItems().stream().map(CartItems::getCartItemsDto).toList();
+
+        OrderDto orderDto = new OrderDto();
+        orderDto.setAmount(activeOrder.getAmount());
+        orderDto.setId(activeOrder.getId());
+        orderDto.setOrderStatus(activeOrder.getOrderStatus());
+        orderDto.setDiscount(activeOrder.getDiscount());
+        orderDto.setTotalAmount(activeOrder.getTotalAmount());
+        orderDto.setCartItems(cartItemsDtoList);
+
+        return orderDto;
     }
 
 }

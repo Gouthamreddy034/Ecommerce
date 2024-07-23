@@ -1,6 +1,7 @@
 package com.yanala.ecommerce.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yanala.ecommerce.dto.CartItemsDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
@@ -31,4 +32,17 @@ public class CartItems {
     @JoinColumn(name = "order_id")
     @JsonIgnore
     private Order order;
+
+    public CartItemsDto getCartItemsDto(){
+        CartItemsDto cartItemsDto = new CartItemsDto();
+        cartItemsDto.setId(id);
+        cartItemsDto.setPrice(price);
+        cartItemsDto.setProductId(product.getId());
+        cartItemsDto.setQuantity(quantity);
+        cartItemsDto.setUserId(user.getId());
+        cartItemsDto.setProductName(product.getName());
+        cartItemsDto.setReturnedImg(product.getImg());
+
+        return cartItemsDto;
+    }
 }

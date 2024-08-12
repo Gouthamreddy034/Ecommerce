@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService{
@@ -218,6 +219,14 @@ public class CartServiceImpl implements CartService{
             return activeOrder.getOrderDto();
         }
         return null;
+    }
+
+    public List<OrderDto> getMyPlacedOrders(Long userId){
+        return orderRepository
+                .findByUserIdAndOrderStatusIn(userId,List.of(OrderStatus.Pending,OrderStatus.Shipped,OrderStatus.Delivered))
+                .stream()
+                .map(Order::getOrderDto)
+                .collect(Collectors.toList());
     }
 
 }

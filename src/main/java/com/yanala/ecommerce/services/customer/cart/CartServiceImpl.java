@@ -3,6 +3,7 @@ package com.yanala.ecommerce.services.customer.cart;
 import com.yanala.ecommerce.dto.AddProductInCartDto;
 import com.yanala.ecommerce.dto.CartItemsDto;
 import com.yanala.ecommerce.dto.OrderDto;
+import com.yanala.ecommerce.dto.PlaceOrderDto;
 import com.yanala.ecommerce.entity.*;
 import com.yanala.ecommerce.enums.OrderStatus;
 import com.yanala.ecommerce.exceptions.ValidationException;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CartServiceImpl implements CartService{
@@ -132,20 +134,73 @@ public class CartServiceImpl implements CartService{
 
             cartItem.setQuantity(cartItem.getQuantity()+1);
 
-            if(activeOrder.getCoupon()!=null){
-                double discountAmount = ((activeOrder.getCoupon().getDiscount()/100.0)* activeOrder.getTotalAmount());
-                double netAmount = activeOrder.getTotalAmount()-discountAmount;
+            return getOrderDto(activeOrder, cartItem);
+        }
+        return null;
+    }
 
-                activeOrder.setAmount((long) netAmount);
-                activeOrder.setDiscount((long) discountAmount);
-            }
+    private OrderDto getOrderDto(Order activeOrder, CartItems cartItem) {
+        if(activeOrder.getCoupon()!=null){
+            double discountAmount = ((activeOrder.getCoupon().getDiscount()/100.0)* activeOrder.getTotalAmount());
+            double netAmount = activeOrder.getTotalAmount()-discountAmount;
 
-            cartItemsRepository.save(cartItem);
+            activeOrder.setAmount((long) netAmount);
+            activeOrder.setDiscount((long) discountAmount);
+        }
+
+        cartItemsRepository.save(cartItem);
+        orderRepository.save(activeOrder);
+
+        return activeOrder.getOrderDto();
+    }
+
+    @Override
+    public OrderDto decreaseProductQuantity(AddProductInCartDto addProductInCartDto){
+        Order activeOrder = orderRepository.findByUserIdAndOrderStatus(addProductInCartDto.getUserId(),OrderStatus.Pending);
+        Optional<Product> optionalProduct = productRepository.findById(addProductInCartDto.getProductId());
+        Optional<CartItems> optionalCartItem = cartItemsRepository.findByProductIdAndOrderIdAndUserId(
+                addProductInCartDto.getProductId(),activeOrder.getId(),addProductInCartDto.getUserId()
+        );
+
+        if(optionalProduct.isPresent() && optionalCartItem.isPresent()){
+            CartItems cartItem = optionalCartItem.get();
+            Product product = optionalProduct.get();
+
+            activeOrder.setAmount(activeOrder.getAmount()-product.getPrice());
+            activeOrder.setTotalAmount(activeOrder.getTotalAmount()- product.getPrice());
+
+            cartItem.setQuantity(cartItem.getQuantity()-1);
+
+            return getOrderDto(activeOrder, cartItem);
+        }
+        return null;
+    }
+
+    @Override
+    public OrderDto placeOrder(PlaceOrderDto placeOrderDto){
+        Order activeOrder = orderRepository.findByUserIdAndOrderStatus(placeOrderDto.getUserId(),OrderStatus.Pending);
+        Optional<User> optionalUser = userRepository.findById(placeOrderDto.getUserId());
+
+        if(optionalUser.isPresent()){
+            activeOrder.setOrderDescription(placeOrderDto.getOrderDescription());
+            activeOrder.setAddress(placeOrderDto.getAddress());
+            activeOrder.setOrderStatus(OrderStatus.Placed);
+            activeOrder.setDate(new Date());
+            activeOrder.setTrackingId(UUID.randomUUID());
+
             orderRepository.save(activeOrder);
+
+            Order order = new Order();
+            order.setAmount(0L);
+            order.setTotalAmount(0L);
+            order.setDiscount(0L);
+            order.setUser(optionalUser.get());
+            order.setOrderStatus(OrderStatus.Pending);
+            orderRepository.save(order);
 
             return activeOrder.getOrderDto();
         }
-        return null;
+        return  null;
     }
 
 }

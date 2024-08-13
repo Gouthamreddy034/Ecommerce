@@ -1,11 +1,13 @@
 package com.yanala.ecommerce.entity;
 
+import com.yanala.ecommerce.dto.FAQDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Data
+@Entity
 public class FAQ {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,4 +21,15 @@ public class FAQ {
     @JoinColumn(name = "product_id",nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Product product;
+
+    public FAQDto getFAQDto() {
+        FAQDto faqDto = new FAQDto();
+
+        faqDto.setId(id);
+        faqDto.setQuestion(question);
+        faqDto.setAnswer(answer);
+        faqDto.setProductId(product.getId());
+
+        return faqDto;
+    }
 }

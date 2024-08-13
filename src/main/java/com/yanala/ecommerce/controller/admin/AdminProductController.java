@@ -1,7 +1,9 @@
 package com.yanala.ecommerce.controller.admin;
 
+import com.yanala.ecommerce.dto.FAQDto;
 import com.yanala.ecommerce.dto.ProductDto;
 import com.yanala.ecommerce.services.admin.adminproduct.AdminProductService;
+import com.yanala.ecommerce.services.admin.faq.FAQService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminProductController {
     private final AdminProductService adminProductService;
+
+    private final FAQService faqService;
 
     @PostMapping("/product")
     public ResponseEntity<ProductDto> addProduct(@ModelAttribute ProductDto productDto) throws IOException {
@@ -42,5 +46,10 @@ public class AdminProductController {
             return ResponseEntity.noContent().build();
         }
         return  ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/faq/{productId}")
+    public ResponseEntity<FAQDto> postFAQ(@PathVariable Long productId,@RequestBody FAQDto faqDto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(faqService.postFAQ(productId,faqDto));
     }
 }

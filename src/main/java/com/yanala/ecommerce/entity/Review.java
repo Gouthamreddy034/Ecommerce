@@ -1,5 +1,6 @@
 package com.yanala.ecommerce.entity;
 
+import com.yanala.ecommerce.dto.ReviewDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
@@ -15,7 +16,7 @@ public class Review {
     private Long rating;
 
     @Lob
-    private String Description;
+    private String description;
 
     @Lob
     @Column(columnDefinition = "longblob")
@@ -30,4 +31,18 @@ public class Review {
     @JoinColumn(name="product_id",nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Product product;
+
+    public ReviewDto getDto() {
+        ReviewDto reviewDto = new ReviewDto();
+
+        reviewDto.setId(id);
+        reviewDto.setRating(rating);
+        reviewDto.setDescription(description);
+        reviewDto.setReturnedImg(img);
+        reviewDto.setProductId(product.getId());
+        reviewDto.setUserId(user.getId());
+        reviewDto.setUsername(user.getName());
+
+        return reviewDto;
+    }
 }

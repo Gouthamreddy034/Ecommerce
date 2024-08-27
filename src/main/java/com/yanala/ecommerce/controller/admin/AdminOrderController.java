@@ -1,5 +1,6 @@
 package com.yanala.ecommerce.controller.admin;
 
+import com.yanala.ecommerce.dto.AnalyticsResponse;
 import com.yanala.ecommerce.dto.OrderDto;
 import com.yanala.ecommerce.services.admin.adminOrder.AdminOrderService;
 import lombok.RequiredArgsConstructor;
@@ -31,4 +32,10 @@ public class AdminOrderController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(orderDto);
     }
+
+    @GetMapping("/order/analytics")
+    public ResponseEntity<AnalyticsResponse> getAnalytics(){
+        return ResponseEntity.ok(adminOrderService.calculateAnalytics());
+    }
+
 }

@@ -1,11 +1,8 @@
 package com.yanala.ecommerce.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Lob;
+
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Arrays;
 
 @Data
 public class ProductDto {

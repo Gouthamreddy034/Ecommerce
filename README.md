@@ -1,6 +1,6 @@
 # eCommerce Backend
 
-This is the backend service for an eCommerce application, built using Spring Boot and MySQL. It serves an Angular web application. 
+This is the backend service for an eCommerce application, built using Spring Boot and MySQL. It serves an Angular web application.
 
 ## Table of Contents 
 

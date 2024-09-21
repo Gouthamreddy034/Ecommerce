@@ -19,11 +19,5 @@ pipeline {
       }
     }
 
-    stage('') {
-      steps {
-        echo 'Your First Jenkins Job is successful'
-      }
-    }
-
   }
 }

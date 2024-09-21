@@ -1,20 +1,29 @@
 pipeline {
-    agent any
-    stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/Gouthamreddy034/Ecommerce.git'
-            }
-        }
-        stage('Build') {
-            steps {
-                sh 'mvn clean install'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
+  agent any
+  stages {
+    stage('Checkout') {
+      steps {
+        git 'https://github.com/Gouthamreddy034/Ecommerce.git'
+      }
     }
+
+    stage('Build') {
+      steps {
+        sh 'mvn clean install'
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh 'mvn test'
+      }
+    }
+
+    stage('') {
+      steps {
+        echo 'Your First Jenkins Job is successful'
+      }
+    }
+
+  }
 }
